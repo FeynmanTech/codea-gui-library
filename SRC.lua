@@ -1,4 +1,4 @@
---[=[TAB:Main]=]
+--UPLOADED_TAB:Main
 -- WinLib
 
 -- Use this function to perform your initial setup
@@ -15,13 +15,15 @@ function setup()
         ui.alert(ui.OKAY, "Results", "You pressed Cancel")
     end)
     local i = readImage("Documents:Alert_small")
-    for x = 1, 24 do
-        for y = 1, 24 do
-            local r,g,b,a = i:get(x, y)
-            i:set(x, y, color(255, a))
+    if i then
+        for x = 1, 24 do
+            for y = 1, 24 do
+                local r,g,b,a = i:get(x, y)
+                i:set(x, y, color(255, a))
+            end
         end
+        saveImage("Documents:Alert_white", i)
     end
-    saveImage("Documents:Alert_white", i)
 end
 
 -- This function gets called once every frame
@@ -38,8 +40,8 @@ function draw()
 end
 
 
---[=[END_TAB]=]
---[=[TAB:Opt]=]
+
+--UPLOADED_TAB:Opt
 function bounds(a, l, h)
     return math.max(l, math.min(a, h)) == a
 end
@@ -107,8 +109,8 @@ local t = {[0] = false, [1] = true}
 function isN(n, b) 
     return t[math.floor(b / n)] 
 end
---[=[END_TAB]=]
---[=[TAB:Rounded]=]
+
+--UPLOADED_TAB:Rounded
 local vertex = [[
 uniform mat4 modelViewProjection;
 
@@ -221,9 +223,119 @@ function rrect(x, y, w, h, r, g)
 
     m:draw()
 end
---[=[END_TAB]=]
---[=[TAB:RoundedSprite]=]
+
+--UPLOADED_TAB:RoundedSprite
 --#nofunc
+
+local vertex = [[
+//
+// A basic vertex shader
+//
+
+//This is the current model * view * projection matrix
+// Codea sets it automatically
+uniform mat4 modelViewProjection;
+
+//This is the current mesh vertex position, color and tex coord
+// Set automatically
+attribute vec4 position;
+attribute vec4 color;
+attribute vec2 texCoord;
+
+//This is an output variable that will be passed to the fragment shader
+varying highp vec4 vColor;
+varying highp vec2 vTexCoord;
+
+varying highp vec4 vPosition;
+
+void main()
+{
+    //Pass the mesh color to the fragment shader
+    vColor = color;
+    vTexCoord = texCoord;
+    vPosition = position;
+    
+    //Multiply the vertex position by our combined transform
+    gl_Position = modelViewProjection * position;
+}
+]]
+
+local fragment = [[
+//
+// A basic fragment shader
+//
+
+//Default precision qualifier
+precision highp float;
+
+//This represents the current texture on the mesh
+uniform highp sampler2D texture;
+
+//The interpolated vertex color for this fragment
+varying highp vec4 vColor;
+
+uniform highp vec2 coords;
+
+uniform highp float r;
+uniform highp float a;
+
+uniform highp vec2 size;
+
+//uniform highp vec4 color;
+uniform highp vec4 g;
+
+varying highp vec4 vPosition;
+
+//The interpolated texture coordinate for this fragment
+varying highp vec2 vTexCoord;
+
+void main()
+{
+    highp vec2 pos = vec2(vTexCoord.xy);
+    //Sample the texture at the interpolated coordinate
+    
+    highp vec4 col = texture2D( texture, pos );
+    
+    //float d = r / abs(coords.w - coords.x);
+    /*
+    vec2 bl = coords + vec2(r, r);
+    vec2 br = coords + vec2(size.x-r, r);
+    vec2 ul = coords + vec2(r, size.y-r);
+    vec2 ur = coords + vec2(size.x-r, size.y-r);
+    //*/
+    
+    vec2 bl = vec2(r, r);
+    vec2 br = vec2(1.-r, r);
+    vec2 ul = vec2(r, 1.-r);
+    vec2 ur = vec2(1.-r, 1.-r);
+        
+    //Set the output color to the texture color
+    gl_FragColor = col - g*(1.-pos.y);
+    /*
+    if (distance(pos, bl) >= r && (pos.x <= bl.x && pos.y <= bl.y)) {
+        gl_FragColor = vec4(0.,0.,0.,0.);
+    } else if (distance(pos, br) >= r && (pos.x >= br.x && pos.y <= br.y)) {
+        gl_FragColor = vec4(0.,0.,0.,0.);
+    } else if (distance(pos, ul) >= r && (pos.x <= ul.x && pos.y >= ul.y)) {
+        gl_FragColor = vec4(0.,0.,0.,0.);
+    } else if (distance(pos, ur) >= r && (pos.x >= ur.x && pos.y >= ur.y)) {
+        gl_FragColor = vec4(0.,0.,0.,0.);
+    }
+    //*/
+    
+    //*
+    if (distance(pos, bl) >= r && (pos.x <= bl.x && pos.y <= bl.y)) {
+        gl_FragColor = vec4(gl_FragColor.rgb, 1. - ((distance(pos, bl) - r)) * a - (1. - gl_FragColor.a));
+    } else if (distance(pos, br) >= r && (pos.x >= br.x && pos.y <= br.y)) {
+        gl_FragColor = vec4(gl_FragColor.rgb, 1. - ((distance(pos, br) - r)) * a - (1. - gl_FragColor.a));
+    } else if (distance(pos, ul) >= r && (pos.x <= ul.x && pos.y >= ul.y)) {
+        gl_FragColor = vec4(gl_FragColor.rgb, 1. - ((distance(pos, ul) - r)) * a - (1. - gl_FragColor.a));
+    } else if (distance(pos, ur) >= r && (pos.x >= ur.x && pos.y >= ur.y)) {
+        gl_FragColor = vec4(gl_FragColor.rgb, 1. - ((distance(pos, ur) - r)) * a - (1. - gl_FragColor.a));
+    }
+    //*/
+}
+]]
 
 rs = {}
 local v = vec2(10,10)
@@ -231,7 +343,7 @@ rs.sh = nil
 rs.m = nil
 function rs._ms() return rs.sh end
 function rs._mm() return rs.m end
-function rs.ms() if rs.sh then return rs.sh else rs.sh = shader("Documents:rsprite") rs.ms = rs._ms return rs.sh end end
+function rs.ms() if rs.sh then return rs.sh else rs.sh = shader(vertex, fragment) rs.ms = rs._ms return rs.sh end end
 function rs.mm() if rs.m  then return rs.m  else rs.m  = mesh() rs.mm = rs._mm return rs.m end end
 function rsprite(i, x, y, w, h, r, g)
     local m2 = rs.mm()
@@ -283,8 +395,8 @@ function rsprite(i, x, y, w, h, r, g)
     m2:draw()
 end
 --rsprite = sprite
---[=[END_TAB]=]
---[=[TAB:UI]=]
+
+--UPLOADED_TAB:UI
 --#nofunc
 
 --UPLOADED_TAB:UI
@@ -607,8 +719,8 @@ function ui.textscroll:draw(win)
     end
     textWrapWidth(WIDTH)
 end
---[=[END_TAB]=]
---[=[TAB:Wins]=]
+
+--UPLOADED_TAB:Wins
 
 --UPLOADED_TAB:Win
 local titlebar = _titlebar
@@ -959,8 +1071,8 @@ function window:extensions(...)
     end
 end
 
---[=[END_TAB]=]
---[=[TAB:Alert]=]
+
+--UPLOADED_TAB:Alert
 --UPLOADED_TAB:Alert
 ui.OKAY_CANCEL = 0
 ui.OKAY = 1
@@ -1079,8 +1191,8 @@ end
 
 ---[[
 --]]
---[=[END_TAB]=]
---[=[TAB:WinSetup]=]
+
+--UPLOADED_TAB:WinSetup
 function winSetup()
     winsOrig, winIndexes = {}, {}
     for i, v in ipairs(wins) do 
@@ -1091,8 +1203,8 @@ function winSetup()
         winIndexes[i] = i 
     end
 end
---[=[END_TAB]=]
---[=[TAB:DemoWindow]=]
+
+--UPLOADED_TAB:DemoWindow
 dev = window(450, 100, 150, 50, "Debug")
 dev.i = readImage("Documents:ngear")
 
@@ -1129,4 +1241,3 @@ end
 --dev.main()
 --]]
 dev:show()
---[=[END_TAB]=]
