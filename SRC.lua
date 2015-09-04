@@ -1,4 +1,4 @@
---UPLOADED_TAB:Main
+--[=[TAB:Main]=]
 -- WinLib
 
 -- Use this function to perform your initial setup
@@ -40,8 +40,8 @@ function draw()
 end
 
 
-
---UPLOADED_TAB:Opt
+--[=[END_TAB]=]
+--[=[TAB:Opt]=]
 function bounds(a, l, h)
     return math.max(l, math.min(a, h)) == a
 end
@@ -109,8 +109,8 @@ local t = {[0] = false, [1] = true}
 function isN(n, b) 
     return t[math.floor(b / n)] 
 end
-
---UPLOADED_TAB:Rounded
+--[=[END_TAB]=]
+--[=[TAB:Rounded]=]
 local vertex = [[
 uniform mat4 modelViewProjection;
 
@@ -223,8 +223,8 @@ function rrect(x, y, w, h, r, g)
 
     m:draw()
 end
-
---UPLOADED_TAB:RoundedSprite
+--[=[END_TAB]=]
+--[=[TAB:RoundedSprite]=]
 --#nofunc
 
 local vertex = [[
@@ -395,8 +395,8 @@ function rsprite(i, x, y, w, h, r, g)
     m2:draw()
 end
 --rsprite = sprite
-
---UPLOADED_TAB:UI
+--[=[END_TAB]=]
+--[=[TAB:UI]=]
 --#nofunc
 
 --UPLOADED_TAB:UI
@@ -719,8 +719,8 @@ function ui.textscroll:draw(win)
     end
     textWrapWidth(WIDTH)
 end
-
---UPLOADED_TAB:Wins
+--[=[END_TAB]=]
+--[=[TAB:Wins]=]
 
 --UPLOADED_TAB:Win
 local titlebar = _titlebar
@@ -1071,8 +1071,8 @@ function window:extensions(...)
     end
 end
 
-
---UPLOADED_TAB:Alert
+--[=[END_TAB]=]
+--[=[TAB:Alert]=]
 --UPLOADED_TAB:Alert
 ui.OKAY_CANCEL = 0
 ui.OKAY = 1
@@ -1191,8 +1191,8 @@ end
 
 ---[[
 --]]
-
---UPLOADED_TAB:WinSetup
+--[=[END_TAB]=]
+--[=[TAB:WinSetup]=]
 function winSetup()
     winsOrig, winIndexes = {}, {}
     for i, v in ipairs(wins) do 
@@ -1203,8 +1203,8 @@ function winSetup()
         winIndexes[i] = i 
     end
 end
-
---UPLOADED_TAB:DemoWindow
+--[=[END_TAB]=]
+--[=[TAB:DemoWindow]=]
 dev = window(450, 100, 150, 50, "Debug")
 dev.i = readImage("Documents:ngear")
 
@@ -1241,3 +1241,4 @@ end
 --dev.main()
 --]]
 dev:show()
+--[=[END_TAB]=]
