@@ -3,6 +3,7 @@
 
 -- Use this function to perform your initial setup
 function setup()
+    displayMode(FULLSCREEN)
     moved = 2
     btext = text --????
     winSetup()
@@ -36,7 +37,21 @@ function draw()
 
     -- Do your drawing here
     drawWindows()
-    
+    keyPressed = "NP"
+    if TOUCHBEGAN then TOUCHBEGAN = false end
+    if TOUCHENDED then TOUCHENDED = false end
+end
+
+function keyboard(k)
+    keyPressed = k
+end
+
+function touched(touch)
+    if touch.state == BEGAN then
+        TOUCHBEGAN = true
+    elseif touch.state == ENDED then
+        TOUCHENDED = true
+    end
 end
 
 
@@ -46,50 +61,14 @@ function bounds(a, l, h)
     return math.max(l, math.min(a, h)) == a
 end
 
+function boundswidth(a, l, w)
+    return math.max(l, math.min(a, l+w)) == a
+end
+
 function range(a, l, h)
     return math.max(l, math.min(a, h))
 end
 
-_titlebar = {}
-_titlebar[1] = function(self)
-    fill(202, 202, 202, 255)
-    rrect(self.x, HEIGHT - self.y, self.w, 20, vec4(0,5,5,0), vec3(50,50,50))
-    --[[
-    fill(202 - 40)
-    noStroke()
-    rrect(self.x, HEIGHT - self.y, self.w, 4, 0, vec3(10,10,10))
-    --]]
-    --[[
-    fill(150)
-    rrect(self.x + self.w - 50, HEIGHT - self.y + 3, 17, 14, 4, vec3(50,50,50))
-    rrect(self.x + self.w - 70, HEIGHT - self.y + 3, 17, 14, 4, vec3(50,50,50))
-    --]]
-    fill(230)
-    text(self.t, self.x + 19.5, HEIGHT - self.y + 0.5)
-    fill(0)
-    text(self.t, self.x + 20, HEIGHT - self.y + 1)
-    --smooth()
-    rsprite(self.ismall, self.x + 3, HEIGHT - self.y + 3, 14, 14, 2)
-end
-_titlebar[0] = function(self)
-    fill(150)
-    rrect(self.x, HEIGHT - self.y, self.w, 20, vec4(0,5,5,0), vec3(50,50,50))
-    --[[
-    fill(150 - 40)
-    noStroke()
-    rrect(self.x, HEIGHT - self.y, self.w, 4, 0, vec3(10,10,10))
-    --]]
-    --[[
-    fill(175)
-    rrect(self.x + self.w - 50, HEIGHT - self.y + 3, 17, 14, 4, vec3(50,50,50))
-    rrect(self.x + self.w - 70, HEIGHT - self.y + 3, 17, 14, 4, vec3(50,50,50))
-    --]]
-    fill(30)
-    text(self.t, self.x + 19.5, HEIGHT - self.y + 0.5)
-    fill(230)
-    text(self.t, self.x + 20, HEIGHT - self.y + 1)
-    rsprite(self.ismall, self.x + 3, HEIGHT - self.y + 3, 14, 14, 2)
-end
 _isOnTop = {function() return true end}
 _isOnTop[0] = function(self, x, y)
     for n = 1, self.cindex - 1 do
@@ -111,6 +90,7 @@ function isN(n, b)
 end
 --[=[END_TAB]=]
 --[=[TAB:Rounded]=]
+---[==[
 local vertex = [[
 uniform mat4 modelViewProjection;
 
@@ -223,6 +203,7 @@ function rrect(x, y, w, h, r, g)
 
     m:draw()
 end
+
 --[=[END_TAB]=]
 --[=[TAB:RoundedSprite]=]
 --#nofunc
@@ -782,7 +763,7 @@ function drawWindows()
     spriteMode(CORNER)
     font("SourceSansPro-Regular")
     --font("HelveticaNeue")
-    fontSize(13.5)
+    fontSize(16)
     pushStyle()
     drawAndRunAll()
     --background(255) runAll() taskbar(1)
@@ -819,6 +800,10 @@ function window:init(x, y, w, h, t, i)
     table.insert(wins, self)
 end
 
+function window:menubar(...)
+    self.menu = {...}
+end
+
 function window:optimize()
     self.main = self.main or function() end
     self.background = self.background or function() end
@@ -846,14 +831,30 @@ end
 
 function window:draw()
     popStyle()
-    
-    titlebar[math.floor(1/self.cindex)](self)
+    fontSize(16)
+    if self.cindex == 1 then
+        fill(202, 202, 202, 255)
+        rrect(self.x, HEIGHT - self.y, self.w, 25, vec4(0,8,8,0), vec3(50,50,50))
+        fill(230)
+        text(self.t, self.x + 25.5, HEIGHT - self.y + 0.5)
+        fill(0)
+        text(self.t, self.x + 26, HEIGHT - self.y + 1)
+        rsprite(self.i, self.x + 3, HEIGHT - self.y + 3, 19, 19, 2)
+    else
+        fill(150)
+        rrect(self.x, HEIGHT - self.y, self.w, 25, vec4(0,8,8,0), vec3(50,50,50))
+        fill(30)
+        text(self.t, self.x + 25.5, HEIGHT - self.y + 0.5)
+        fill(230)
+        text(self.t, self.x + 26, HEIGHT - self.y + 1)
+        rsprite(self.i, self.x + 3, HEIGHT - self.y + 3, 19, 19, 2)
+    end
     fill(self.closehover and color(175,50,50) or color(230, 30, 30))
-    rrect(self.x + self.w - 30, HEIGHT - self.y + 3, 27, 14, 4, vec3(50,70,70))
+    rrect(self.x + self.w - 40, HEIGHT - self.y + 3, 37, 19, 8, vec3(50,70,70))
     --]]
     local r, g, b = fill()
     fill(r-40,g-60,b-60)
-    rrect(self.x + self.w - 7, HEIGHT - self.y + 3, 4, 4, 0, vec3(5,10,10))
+    rrect(self.x + self.w - 10, HEIGHT - self.y + 3, 7, 6, 0, vec3(5,10,10))
     --]]
     --smooth()
     
@@ -880,13 +881,15 @@ function window:run()
         end
     --end
     --]]
+    --[[
     if bounds(x, self.x, self.x + self.w) and bounds(y, HEIGHT - self.y - self.h, HEIGHT - self.y) and onTop then
         self:show()
         adjustcindex()
     end
+    --]]
     if 
-        (bounds(x, self.x + self.w - 30, self.x + self.w - 3) and 
-        bounds(y, HEIGHT - self.y + 3, HEIGHT - self.y + 17) and onTop)
+        (bounds(x, self.x + self.w - 40, self.x + self.w - 3) and 
+        bounds(y, HEIGHT - self.y + 3, HEIGHT - self.y + 19) and onTop)
         or self.done
     then
         if self.closed then else
@@ -912,7 +915,7 @@ function window:run()
         self.closed = false
         self.closehover = false
         if bounds(x, self.x, self.x + self.w) and bounds(y, HEIGHT - self.y, HEIGHT - self.y + 20) and
-            not(self.dragx and self.dragy) and CurrentTouch.state == BEGAN and onTop
+            not(self.dragx and self.dragy) and CurrentTouch.state == BEGAN and onTop and TOUCHBEGAN
         then
             moved = 1
             self.dragx = x
@@ -942,6 +945,20 @@ function window:run()
                 self.clip = function() clip(self.x + 1, HEIGHT - self.y - self.h + 2, self.w - 2, self.h - 2) end
                 self.translate = function() translate(self.x + 1, HEIGHT - self.y - self.h + 1) end
             end
+        elseif self.menu and bounds(x, self.x, self.x + self.w) and bounds(y, HEIGHT - self.y - 20, HEIGHT - self.y) and
+            not(self.dragx and self.dragy) and CurrentTouch.state == BEGAN and onTop and TOUCHBEGAN
+        then
+            local tp = 4
+            for i, v in ipairs(self.menu) do
+                if bounds(x - self.x, tp, tp + textSize(v[1])) then
+                    self.menubar_selection = i
+                    break
+                else
+                    tp = tp + textSize(v[1])
+                end
+            end
+        elseif TOUCHBEGAN then
+            --self.menubar_selection = nil
         end
     end
     pushStyle()
@@ -951,14 +968,20 @@ function window:run()
     strokeWidth(1/ContentScaleFactor)
     rect(self.x, HEIGHT - self.y - self.h + 1, self.w, self.h)
     
-    --[[
-    stroke(150)
-    rect(self.x + 1/ContentScaleFactor, HEIGHT - self.y - self.h + 1 + 1/ContentScaleFactor, self.w-1, self.h-1)
-    --]]
+    fontSize(14)
+    if self.menu then
+        fill(200)
+        rect(self.x, HEIGHT - self.y - 20, self.w, 20)
+        fill(30)
+        local tp = 4
+        strokeWidth(1/ContentScaleFactor)
+        for i, v in ipairs(self.menu) do
+            text(v[1], self.x + tp, HEIGHT - self.y - 19)
+            tp = tp + textSize(v[1]) + 8
+            line(self.x + tp - 4, HEIGHT - self.y - 19, self.x + tp - 4, HEIGHT - self.y)
+        end
+    end
     
-    --Run window
-    --if self.main then
-        --clip()
     self.pmousex, self.pmousey = self.mousex and self.mousex or CurrentTouch.x - self.x - 1, self.mousey and self.mousey or CurrentTouch.y - (HEIGHT - self.y - self.h + 1)
     self.mousex, self.mousey = CurrentTouch.x - self.x - 1, CurrentTouch.y - (HEIGHT - self.y - self.h + 1)
     --pmousex, pmousey = CurrentTouch.prevX - self.x - 1, CurrentTouch.prevY - (HEIGHT - self.y - self.h + 1)
@@ -976,11 +999,40 @@ function window:run()
     clip()
     popMatrix()
     popStyle()
+    fontSize(14)
+    if self.menu and self.menubar_selection then
+        local tp = 0
+        for i = 1, self.menubar_selection - 1 do
+            tp = tp + textSize(self.menu[i][1]) + 8
+        end
+        local w = 0
+        for i, v in ipairs(self.menu[self.menubar_selection][2]) do
+            w = math.max(w, textSize(v) + 8)
+        end
+        noStroke()
+        fill(240)
+        rect(self.x + tp, HEIGHT - self.y - 20 - #self.menu[self.menubar_selection][2] * 16, w, #self.menu[self.menubar_selection][2] * 16)
+        fill(30)
+        for i, v in ipairs(self.menu[self.menubar_selection][2]) do
+            text(v, self.x + tp + 4, HEIGHT - self.y - 21 - i * 16)
+        end
+        if boundswidth(x, self.x + tp, w) and boundswidth(y, HEIGHT - self.y - 20 - #self.menu[self.menubar_selection][2] * 16, #self.menu[self.menubar_selection][2] * 16) then
+            fill(0,30)
+            rect(self.x + tp, HEIGHT - self.y - 20 - #self.menu[self.menubar_selection][2] * 16 + math.floor((y - (HEIGHT - self.y - 20 - #self.menu[self.menubar_selection][2] * 16)) / 16) * 16, w, 16)
+            if CurrentTouch.state == ENDED and TOUCHENDED then
+                self.menu[self.menubar_selection][3][#self.menu[self.menubar_selection][2] - math.floor((y - (HEIGHT - self.y - 20 - #self.menu[self.menubar_selection][2] * 16)) / 16)]()
+                self.menubar_selection = nil
+            end
+        elseif not(boundswidth(x, self.x + tp, w) and boundswidth(y, HEIGHT - self.y - 20, 20)) then
+            self.menubar_selection = nil
+        end
+    end
 --end
 --if self.background then
     self.background()
     --end
     --self:draw()
+    --ctended = false
 end
 
 function window:show()
@@ -1081,10 +1133,10 @@ ui.alerttypes = {}
     
 ui.alerttypes[ui.OKAY_CANCEL] = function(title, contents, f_okay, f_cancel)
     font("SourceSansPro-Regular")
-    fontSize(13.5)
+    fontSize(16)
     local x, y = textSize(contents)
     x = math.max(x, 115)
-    local calert = window(WIDTH / 2 - x / 2 + 20,  HEIGHT / 2 - (y + 20 + 24) / 2, x + 20, y + 35, title)
+    local calert = window(WIDTH / 2 - x / 2 + 20,  HEIGHT / 2 - (y + 20 + 24) / 2, x + 20, y + 40, title)
     calert.hidden = true
     
     --ui.calert.w_ = ui.calert.w
@@ -1106,7 +1158,7 @@ ui.alerttypes[ui.OKAY_CANCEL] = function(title, contents, f_okay, f_cancel)
     
     calert.done = false
     
-    local okay = calert:button(10, 10, 50, 16, "Okay", function()
+    local okay = calert:button(10, 10, 75, 21, "Okay", function()
         adjustcindex()
         table.remove(wins, calert.cindex)
         calert:destroy()
@@ -1114,7 +1166,7 @@ ui.alerttypes[ui.OKAY_CANCEL] = function(title, contents, f_okay, f_cancel)
         adjustcindex()
         if f_okay then f_okay() end
     end)
-    local cancel = calert:button(70, 10, 50, 16, "Cancel", function() 
+    local cancel = calert:button(95, 10, 75, 21, "Cancel", function() 
         adjustcindex()
         table.remove(wins, calert.cindex)
         calert:destroy()
@@ -1127,7 +1179,7 @@ ui.alerttypes[ui.OKAY_CANCEL] = function(title, contents, f_okay, f_cancel)
         fill(0)
         textMode(CORNER)
         font("SourceSansPro-Regular")
-        fontSize(13.5)
+        fontSize(16)
         
         text(contents, 10, calert.h - y - 5)
         okay:draw()
@@ -1140,10 +1192,10 @@ end
 
 ui.alerttypes[ui.OKAY] = function(title, contents)
     font("SourceSansPro-Regular")
-    fontSize(13.5)
+    fontSize(16)
     local x, y = textSize(contents)
     x = math.max(x, 75)
-    local calert = window(WIDTH / 2 - x / 2 + 20,  HEIGHT / 2 - (y + 20 + 24) / 2, x + 20, y + 35, title)
+    local calert = window(WIDTH / 2 - x / 2 + 20,  HEIGHT / 2 - (y + 20 + 24) / 2, x + 20, y + 40, title)
     calert.hidden = true
     
     --ui.calert.w_ = ui.calert.w
@@ -1165,7 +1217,7 @@ ui.alerttypes[ui.OKAY] = function(title, contents)
     
     calert.done = false
     
-    local okay = calert:button(10, 10, 50, 16, "Okay", function()
+    local okay = calert:button(10, 10, 75, 20, "Okay", function()
         adjustcindex()
         table.remove(wins, calert.cindex)
         calert = nil
@@ -1175,7 +1227,7 @@ ui.alerttypes[ui.OKAY] = function(title, contents)
         fill(0)
         textMode(CORNER)
         font("SourceSansPro-Regular")
-        fontSize(13.5)
+        fontSize(16)
         
         text(contents, 10, calert.h - y - 5)
         okay:draw()
@@ -1241,4 +1293,61 @@ end
 --dev.main()
 --]]
 dev:show()
+--[=[END_TAB]=]
+--[=[TAB:TextEditor]=]
+edit = window(400, 500, 300, 226, "Text Editor")
+edit.i = readImage("Documents:TextEdit")
+edit.ismall = readImage("Documents:TextEditSmall")
+
+edit_te = edit:textscroll(10, 36, edit.w - 20, edit.h - 66)
+
+edit_b = edit:button(10, 10, 50, 16, "Save", 
+    function()
+        ui.alert(ui.OKAY, "Document saved", "It actually wasn't saved, but if you imagine hard enough you can believe that it was")
+    end
+)
+
+edit:menubar({"File", 
+    {"Save...", "Save As...", "Exit"}, 
+    {
+        function() ui.alert(ui.OKAY, "Saving...", "Not actually saving, since that isn't supported yet") end,
+        function() ui.alert(ui.OKAY, "Saving...", "Sorry, you can't choose filenames yet") end,
+        function() edit:destroy() end
+    }
+},
+{"Help", 
+    {"Help", "About"}, 
+    {
+        function() ui.alert(ui.OKAY, "Help", "Tap anywhere in the textedit box to set the cursor position.\nHold down the cursor for a moment to enable cursor dragging.\nScroll your finger to scroll.") end,
+        function() ui.alert(ui.OKAY, "About", "why are you even here? do you expect to find something interesting about the history of a tiny text editor program I made?") end
+    }
+})
+
+function edit:start(t)
+    t = t and t .. "\n" or "\n"
+    edit_te.t = {""}
+    for row in t:gmatch("([^\n]+)\n") do
+        table.insert(edit_te.t, row)
+    end
+end
+
+function edit:main()
+    edit_b:draw(self)
+    edit_te:draw(self)
+end
+
+edit:extensions("txt", "log")
+
+---[[
+edit.onclose = function()
+    edit:show()
+    ui.alert(ui.OKAY_CANCEL,
+        "Warning", "Are you sure you want to close?\nYou will probably lose your progress.", 
+        function() edit:mhide() end, function() edit:show() end
+    )
+    return true
+end
+
+edit:show()
+--]]
 --[=[END_TAB]=]
